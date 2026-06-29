@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Dragon Boat Race</title>
+    <link rel="stylesheet" href="/src/client/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="stage">
+        <canvas id="game"></canvas>
+
+        <!-- HUD overlay -->
+        <div id="hud" class="hud-top">
+          <div class="hud-card">
+            <div class="hud-label">SPEED</div>
+            <div class="hud-value"><span id="hud-speed">3.5</span> <span class="hud-unit">m/s</span></div>
+            <div class="hud-bar"><div id="hud-speed-bar" class="hud-bar-fill speed"></div></div>
+          </div>
+          <div class="hud-card center">
+            <div class="hud-label">POSITION</div>
+            <div class="hud-value"><span id="hud-pos">1</span><span class="hud-unit" id="hud-pos-sfx">st</span> <span class="hud-unit">/ <span id="hud-total">6</span></span></div>
+            <div class="hud-sub"><span id="hud-dist">500</span> m to go</div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label">FATIGUE</div>
+            <div class="hud-value"><span id="hud-fatigue">0</span><span class="hud-unit">%</span></div>
+            <div class="hud-bar"><div id="hud-fatigue-bar" class="hud-bar-fill fatigue"></div></div>
+          </div>
+        </div>
+
+        <div id="power-banner" class="power-banner hidden">
+          Power 10 &times;<span id="power-stacks">1</span> &middot; +<span id="power-pct">20</span>% &middot; <span id="power-time">10</span>s
+        </div>
+
+        <div id="toast" class="toast hidden"></div>
+
+        <!-- Controls -->
+        <div id="controls" class="controls">
+          <button id="btn-left" class="ctrl ctrl-round" aria-label="Move left">&#8592;</button>
+          <button id="btn-power" class="ctrl ctrl-power">&#9889; Power 10</button>
+          <button id="btn-right" class="ctrl ctrl-round" aria-label="Move right">&#8594;</button>
+        </div>
+
+        <!-- Start / finish overlay -->
+        <div id="overlay" class="overlay">
+          <div class="overlay-box">
+            <h1 id="overlay-title">Dragon Boat Race</h1>
+            <p id="overlay-text">Reach the finish line first. Steer with &#8592; &#8594; (or the buttons), tap Power 10 (or Space) for a burst of speed — but watch your fatigue.</p>
+            <div id="menu" class="menu">
+              <button id="btn-practice" class="ctrl ctrl-power big">Practice vs AI</button>
+              <button id="btn-multiplayer" class="ctrl ctrl-power big">Multiplayer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/client/main.ts"></script>
+  </body>
+</html>

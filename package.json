@@ -1,0 +1,30 @@
+{
+  "name": "dragon-boat-race",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Multiplayer dragon boat racing game",
+  "scripts": {
+    "dev": "concurrently -k -n server,client \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "cross-env PORT=3000 tsx watch server/index.ts",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json",
+    "build": "npm run typecheck && vite build",
+    "start": "tsx server/index.ts",
+    "preview": "vite preview",
+    "test": "node test/two-clients.mjs"
+  },
+  "dependencies": {
+    "sirv": "^2.0.4",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/ws": "^8.5.12",
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
+  }
+}
