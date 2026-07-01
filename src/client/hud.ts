@@ -39,7 +39,7 @@ export class Hud {
     this.total.textContent = String(CONFIG.NUM_BOATS);
   }
 
-  update(game: GameView): void {
+  update(game: GameView, isMultiplayer = false): void {
     const p = game.player;
     if (p) {
       this.speed.textContent = p.speed.toFixed(1);
@@ -68,11 +68,11 @@ export class Hud {
       this.toast.classList.add('hidden');
     }
 
-    this.updateOverlay(game);
+    this.updateOverlay(game, isMultiplayer);
   }
 
   /** Show/hide and fill the central overlay based on the current phase. */
-  private updateOverlay(game: GameView): void {
+  private updateOverlay(game: GameView, isMultiplayer: boolean): void {
     const phase = game.phase;
     if (phase === 'racing') {
       this.overlay.classList.add('hidden');
@@ -84,12 +84,15 @@ export class Hud {
     // A key so we only touch the DOM when the displayed content changes.
     const cd = game.countdown ?? 0;
     const key = phase === 'countdown' ? `cd:${cd}`
-      : phase === 'finished' ? `fin:${game.player?.rank ?? 0}`
+      : phase === 'finished' ? `fin:${game.player?.rank ?? 0}:${isMultiplayer}`
       : phase;
     if (key === this.overlayKey) return;
     this.overlayKey = key;
 
-    const showMenu = phase === 'ready' || phase === 'finished';
+    // The join menu belongs on the opening screen and single-player results.
+    // In multiplayer the next race starts automatically, so hide it there —
+    // otherwise players re-click "Multiplayer" and open a duplicate connection.
+    const showMenu = phase === 'ready' || (phase === 'finished' && !isMultiplayer);
     this.menu.classList.toggle('hidden', !showMenu);
 
     if (phase === 'countdown') {
@@ -102,7 +105,8 @@ export class Hud {
       const rank = game.player?.rank ?? 0;
       const won = rank === 1;
       this.overlayTitle.textContent = won ? 'You won! 🏆' : `Finished ${rank}${ordinalSuffix(rank)}`;
-      this.overlayText.innerHTML = this.resultsHtml(game);
+      this.overlayText.innerHTML = this.resultsHtml(game)
+        + (isMultiplayer ? '<p style="margin-top:10px">Next race starting…</p>' : '');
     } else { // ready
       this.overlayTitle.textContent = 'Dragon Boat Race';
       this.overlayText.textContent = INSTRUCTIONS;

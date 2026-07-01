@@ -27,6 +27,11 @@ document.getElementById('btn-practice')!.addEventListener('click', () => {
 });
 
 document.getElementById('btn-multiplayer')!.addEventListener('click', () => {
+  // Reuse the existing connection if we're already in multiplayer — opening a
+  // second WebSocket would register the user as a duplicate player and leave a
+  // zombie holding a boat lane while the client controls a lane-less spectator.
+  if (remote?.connected) { active = remote; return; }
+  remote?.disconnect();
   const r = new RemoteGame();
   r.connect();
   remote = r;
@@ -44,7 +49,7 @@ function frame(now: number): void {
   try {
     active.update(dt);
     renderer.render(active);
-    hud.update(active);
+    hud.update(active, active === remote);
   } catch (err) {
     console.error('frame error', err);
   }

@@ -92,5 +92,6 @@ html, body {
 .results { list-style: none; padding: 0; margin: 12px 0; font-size: 15px; text-align: left; }
 .results li { padding: 4px 0; display: flex; justify-content: space-between; gap: 16px; }
 .results li.you { font-weight: 700; color: #ffd98a; }
+.dragon { display: block; width: 160px; height: auto; margin: 0 auto 6px; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
 .menu { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 12px; }
 .menu.hidden { display: none; }
