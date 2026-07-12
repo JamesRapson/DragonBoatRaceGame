@@ -16,7 +16,7 @@ const clients = ['A', 'B'].map((tag) => {
         state.lastWorld = m.s.entities.map((e) => `${e.id}:${e.kind}`).join(',');
         // Drive the boat a little so we exercise input handling.
         ws.send(JSON.stringify({ t: 'steer', dir: state.tag === 'A' ? 1 : -1 }));
-        if (state.states % 20 === 0) ws.send(JSON.stringify({ t: 'power' }));
+        ws.send(JSON.stringify({ t: 'power', on: state.states % 40 < 20 }));
       }
     } else if (m.t === 'toast') state.toasts++;
   });

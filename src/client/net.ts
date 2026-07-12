@@ -33,6 +33,7 @@ export class RemoteGame implements GameView, GameController {
   private buf: Stamped[] = [];
   private myBoatId: number | null = null;
   private toastExpiry = 0;
+  private powerHeld = false;
 
   connect(): void {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -51,6 +52,8 @@ export class RemoteGame implements GameView, GameController {
   private onMessage(msg: ServerMsg): void {
     if (msg.t === 'welcome') {
       this.myBoatId = msg.boatId;
+      // Re-assert a held Power 10 into the new race (server reset it on start).
+      if (this.powerHeld) this.send({ t: 'power', on: true });
     } else if (msg.t === 'state') {
       this.buf.push({ t: performance.now(), s: msg.s });
       if (this.buf.length > 16) this.buf.shift();
@@ -62,7 +65,7 @@ export class RemoteGame implements GameView, GameController {
 
   // --- GameController ---
   setSteer(dir: number): void { this.send({ t: 'steer', dir }); }
-  triggerPower(): void { this.send({ t: 'power' }); }
+  setPower(on: boolean): void { this.powerHeld = on; this.send({ t: 'power', on }); }
   start(): void { /* the server controls when a race starts */ }
 
   // --- GameView ---
@@ -111,8 +114,7 @@ export class RemoteGame implements GameView, GameController {
       id: b.id, name: b.name, hull: b.hull, accent: b.accent,
       isPlayer: b.id === this.myBoatId,
       x: lerp(a.x, b.x, t), dist: lerp(a.dist, b.dist, t),
-      speed: b.speed, fatigue: b.fatigue,
-      powerMult: b.powerMult, powerStacks: b.powerStacks, powerUntil: b.powerUntil,
+      speed: b.speed, fatigue: b.fatigue, powering: b.powering,
       bankUntil: b.bankUntil, obstUntil: b.obstUntil, collUntil: b.collUntil,
       finished: b.finished, finishTime: b.finishTime, rank: b.rank,
       strokePhase: lerpPhase(a.strokePhase, b.strokePhase, t),

@@ -61,9 +61,7 @@ export class Game implements GameView, GameController {
         dist: 0,
         speed: CONFIG.BASE_SPEED_MS,
         fatigue: 0,
-        powerMult: 1,
-        powerStacks: 0,
-        powerUntil: 0,
+        powering: false,
         bankUntil: 0,
         obstUntil: 0,
         collUntil: 0,
@@ -104,21 +102,10 @@ export class Game implements GameView, GameController {
     if (b) b.steerInput = dir;
   }
 
-  /** Trigger a Power 10 for a given boat (defaults to the local player). */
-  triggerPower(id = this.localPlayerId): void {
-    if (this.phase !== 'racing') return;
+  /** Hold/release Power 10 for a boat (defaults to the local player). */
+  setPower(on: boolean, id = this.localPlayerId): void {
     const b = this.boats[id];
-    if (b) this.applyPower(b);
-  }
-
-  /** Apply (and stack) a Power 10 to a boat. */
-  private applyPower(b: Boat): void {
-    if (b.fatigue >= CONFIG.MAX_FATIGUE) return;
-    if (this.time >= b.powerUntil) { b.powerMult = 1; b.powerStacks = 0; }
-    b.powerMult += CONFIG.POWER10_SPEED_STEP;
-    b.powerStacks += 1;
-    b.powerUntil = this.time + CONFIG.POWER10_DURATION_S;
-    b.fatigue = Math.min(CONFIG.MAX_FATIGUE, b.fatigue + CONFIG.POWER10_FATIGUE_COST);
+    if (b) b.powering = on;
   }
 
   canPower(): boolean {
@@ -151,7 +138,7 @@ export class Game implements GameView, GameController {
     for (const b of this.boats) {
       if (b.finished) continue;
       if (b.ai) {
-        updateAi(b, this.entities, this.time, leadDist, (x) => this.applyPower(x), dt);
+        updateAi(b, this.entities, this.time, leadDist, dt);
       } else {
         b.x += b.steerInput * CONFIG.LATERAL_SPEED_MS * dt;
       }
@@ -176,9 +163,6 @@ export class Game implements GameView, GameController {
   }
 
   private updateBoat(b: Boat, dt: number): void {
-    // Expire Power 10.
-    if (this.time >= b.powerUntil) { b.powerMult = 1; b.powerStacks = 0; }
-
     // Clamp lateral position; hitting a bank costs speed.
     const margin = CONFIG.BOAT_WID_M / 2;
     let hitBank = false;
@@ -189,8 +173,12 @@ export class Game implements GameView, GameController {
       this.showToast('Hit the bank! −30%', b.id);
     }
 
-    // Base speed with Power 10 stacks.
-    let speed = CONFIG.BASE_SPEED_MS * b.powerMult;
+    // Power 10: continuous boost while held, draining fatigue; cuts out at max.
+    let speed = CONFIG.BASE_SPEED_MS;
+    if (b.powering && b.fatigue < CONFIG.MAX_FATIGUE) {
+      speed *= 1 + CONFIG.POWER10_SPEED_BOOST;
+      b.fatigue = Math.min(CONFIG.MAX_FATIGUE, b.fatigue + CONFIG.POWER10_FATIGUE_RATE * dt);
+    }
 
     // Feature interactions.
     let inTide: Entity | null = null;

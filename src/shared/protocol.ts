@@ -4,13 +4,13 @@ import type { Boat, Entity, GamePhase } from './types';
 export type ClientMsg =
   | { t: 'join'; name?: string }
   | { t: 'steer'; dir: number }
-  | { t: 'power' };
+  | { t: 'power'; on: boolean };
 
 /** Boat fields needed to render — excludes server-only ai/steerInput. */
 export type BoatSnap = Pick<
   Boat,
   | 'id' | 'name' | 'hull' | 'accent' | 'x' | 'dist' | 'speed' | 'fatigue'
-  | 'powerMult' | 'powerStacks' | 'powerUntil' | 'bankUntil' | 'obstUntil'
+  | 'powering' | 'bankUntil' | 'obstUntil'
   | 'collUntil' | 'finished' | 'finishTime' | 'rank' | 'strokePhase'
 >;
 
@@ -37,8 +37,8 @@ export type ServerMsg =
 export function snapBoat(b: Boat): BoatSnap {
   return {
     id: b.id, name: b.name, hull: b.hull, accent: b.accent, x: b.x, dist: b.dist,
-    speed: b.speed, fatigue: b.fatigue, powerMult: b.powerMult, powerStacks: b.powerStacks,
-    powerUntil: b.powerUntil, bankUntil: b.bankUntil, obstUntil: b.obstUntil,
+    speed: b.speed, fatigue: b.fatigue, powering: b.powering,
+    bankUntil: b.bankUntil, obstUntil: b.obstUntil,
     collUntil: b.collUntil, finished: b.finished, finishTime: b.finishTime,
     rank: b.rank, strokePhase: b.strokePhase,
   };

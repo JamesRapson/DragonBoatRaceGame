@@ -3,15 +3,15 @@ import type { Boat, Entity } from './types';
 
 /**
  * Lightweight AI for rival boats: wander toward a target lane, dodge the
- * nearest hazard ahead, drift toward helpful tides / energy disks, and spend
- * Power 10 occasionally (more aggressively when trailing).
+ * nearest hazard ahead, drift toward helpful tides / energy disks, and hold
+ * Power 10 in bursts (more aggressively when trailing), easing off before
+ * fatigue maxes out.
  */
 export function updateAi(
   boat: Boat,
   entities: Entity[],
   time: number,
   leaderDist: number,
-  usePower: (b: Boat) => void,
   dt: number,
 ): void {
   const ai = boat.ai;
@@ -56,15 +56,14 @@ export function updateAi(
   const step = CONFIG.LATERAL_SPEED_MS * (0.55 + ai.skill * 0.45) * dt;
   boat.x += Math.sign(diff) * Math.min(Math.abs(diff), step);
 
-  // Decide whether to spend a Power 10.
-  if (time >= ai.nextPowerAt && boat.fatigue <= CONFIG.MAX_FATIGUE - CONFIG.POWER10_FATIGUE_COST) {
+  // Hold Power 10 in bursts: start sprinting when fresh and eager, then ease
+  // off before fatigue maxes so there's something left in reserve.
+  if (boat.powering) {
+    if (boat.fatigue > 75) boat.powering = false;
+  } else if (time >= ai.nextPowerAt && boat.fatigue < 55) {
     const trailing = leaderDist - boat.dist; // metres behind the leader
-    const eagerness = ai.skill * 0.6 + (trailing > 20 ? 0.4 : 0);
-    if (Math.random() < eagerness) {
-      usePower(boat);
-      ai.nextPowerAt = time + 6 + Math.random() * 8;
-    } else {
-      ai.nextPowerAt = time + 2 + Math.random() * 3;
-    }
+    const eagerness = ai.skill * 0.5 + (trailing > 20 ? 0.4 : 0.1);
+    if (Math.random() < eagerness) boat.powering = true;
+    ai.nextPowerAt = time + 1 + Math.random() * 3;
   }
 }

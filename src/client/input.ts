@@ -25,16 +25,31 @@ export function bindInput(getController: () => GameController): void {
   hold(btnLeft, (v) => (left = v));
   hold(btnRight, (v) => (right = v));
 
-  btnPower.addEventListener('click', () => getController().triggerPower());
+  // Power 10 is now hold-to-sprint: active while the button/space is held.
+  let powering = false;
+  const setPower = (on: boolean) => {
+    if (on === powering) return; // only send on change
+    powering = on;
+    getController().setPower(on);
+  };
+  const pdown = (e: Event) => { e.preventDefault(); setPower(true); };
+  const pup = () => setPower(false);
+  btnPower.addEventListener('pointerdown', pdown);
+  btnPower.addEventListener('pointerup', pup);
+  btnPower.addEventListener('pointerleave', pup);
+  btnPower.addEventListener('pointercancel', pup);
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     if (e.key === 'ArrowLeft' || e.key === 'a') { left = true; applySteer(); }
     else if (e.key === 'ArrowRight' || e.key === 'd') { right = true; applySteer(); }
-    else if (e.key === ' ') { e.preventDefault(); getController().triggerPower(); }
+    else if (e.key === ' ') { e.preventDefault(); setPower(true); }
   });
   window.addEventListener('keyup', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a') { left = false; applySteer(); }
     else if (e.key === 'ArrowRight' || e.key === 'd') { right = false; applySteer(); }
+    else if (e.key === ' ') { setPower(false); }
   });
+  // Safety: if the window loses focus mid-hold, stop sprinting so it can't stick on.
+  window.addEventListener('blur', () => { setPower(false); if (left || right) { left = right = false; applySteer(); } });
 }

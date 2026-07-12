@@ -8,7 +8,7 @@ function ordinalSuffix(n: number): string {
 }
 
 const INSTRUCTIONS =
-  'Reach the finish line first. Steer with ← → (or the buttons), tap Power 10 (or Space) for a burst of speed — but watch your fatigue.';
+  'Reach the finish line first. Steer with ← → (or the buttons), and hold Power 10 (or Space) to sprint — but it drains your fatigue.';
 
 /** Reflects game state into the DOM HUD overlay each frame. */
 export class Hud {
@@ -23,9 +23,6 @@ export class Hud {
   private total = this.el('hud-total');
   private dist = this.el('hud-dist');
   private power = this.el('power-banner');
-  private powerStacks = this.el('power-stacks');
-  private powerPct = this.el('power-pct');
-  private powerTime = this.el('power-time');
   private toast = this.el('toast');
   private btnPower = this.el('btn-power') as HTMLButtonElement;
   private overlay = this.el('overlay');
@@ -50,13 +47,8 @@ export class Hud {
       this.posSfx.textContent = ordinalSuffix(p.rank);
       this.dist.textContent = String(Math.max(0, Math.round(CONFIG.RACE_LENGTH_M - p.dist)));
 
-      const powerActive = game.time < p.powerUntil;
-      this.power.classList.toggle('hidden', !powerActive);
-      if (powerActive) {
-        this.powerStacks.textContent = String(p.powerStacks);
-        this.powerPct.textContent = String(Math.round((p.powerMult - 1) * 100));
-        this.powerTime.textContent = String(Math.ceil(p.powerUntil - game.time));
-      }
+      const boosting = p.powering && p.fatigue < CONFIG.MAX_FATIGUE;
+      this.power.classList.toggle('hidden', !boosting);
     }
 
     this.btnPower.disabled = !game.canPower();

@@ -13,10 +13,8 @@ export interface Boat {
   speed: number; // current effective forward speed (m/s)
   fatigue: number; // 0..100
 
-  // Power 10 state
-  powerMult: number; // current speed multiplier from stacked Power 10s (1 = none)
-  powerStacks: number; // number of active stacks
-  powerUntil: number; // sim-time when the boost expires
+  // Power 10 state — held to sprint (continuous boost while true)
+  powering: boolean; // is the Power 10 currently held/active
 
   // Penalty timers (sim-time when each penalty ends)
   bankUntil: number;
@@ -80,6 +78,6 @@ export interface GameView {
 /** Write side: player input + race control. */
 export interface GameController {
   setSteer(dir: number): void;
-  triggerPower(): void;
+  setPower(on: boolean): void; // hold to sprint: true while held, false on release
   start(): void;
 }

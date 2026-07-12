@@ -21,10 +21,11 @@ export const CONFIG = {
   SIM_SPEED: 2.4,
 
   // --- Power 10 ---
-  POWER10_SPEED_STEP: 0.30, // each press adds +20% speed
-  POWER10_DURATION_S: 10, // duration of the boost (refreshed on each press)
-  POWER10_FATIGUE_COST: 20, // fatigue added per press
-  MAX_FATIGUE: 100, // Power 10 disabled at this fatigue level
+  // Hold to sprint: while held, the boat gets a continuous speed boost and
+  // fatigue climbs. Released (or at max fatigue), the boost stops.
+  POWER10_SPEED_BOOST: 0.30, // continuous speed multiplier while held (+30%)
+  POWER10_FATIGUE_RATE: 2, // fatigue points gained per second while held
+  MAX_FATIGUE: 100, // boost cuts out at this fatigue level
 
   // --- Tides ---
   TIDE_BOOST: 0.25, // +15% when travelling with the tide

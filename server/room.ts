@@ -59,7 +59,7 @@ export class Room {
         if (p.boatId != null) this.game.setSteer(Math.sign(msg.dir), p.boatId);
         break;
       case 'power':
-        if (p.boatId != null) this.game.triggerPower(p.boatId);
+        if (p.boatId != null) this.game.setPower(msg.on, p.boatId);
         break;
     }
   }
